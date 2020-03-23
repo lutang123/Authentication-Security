@@ -13,7 +13,8 @@ const ejs = require("ejs");
 app.set('view engine', 'ejs');
 
 const mongoose = require('mongoose');
-const encrypt = require('mongoose-encryption');
+// const encrypt = require('mongoose-encryption');
+const md5 = require("md5")
 // mongoose.connect('mongodb+srv://admin-lu:0629*Salu@cluster0-igwj0.mongodb.net/wikiDB', {useNewUrlParser: true, useUnifiedTopology: true});
 mongoose.connect("mongodb://localhost/userDB", {useNewUrlParser: true, useUnifiedTopology: true});
 
@@ -23,7 +24,7 @@ const UserSchema = new Schema({
     password: String
 });
 
-UserSchema.plugin(encrypt, {secret:process.env.SECRET, encryptedField:["password"]})
+// UserSchema.plugin(encrypt, {secret:process.env.SECRET, encryptedField:["password"]})
 
 const User = mongoose.model("User", UserSchema);
 
@@ -41,7 +42,7 @@ app.get("/register", function(req, res){
 })
 
 app.post("/register", function(req, res){
-  const newUser = new User({email:req.body.email, password:req.body.password})
+  const newUser = new User({email:req.body.email, password:md5(req.body.password)})
   newUser.save(function(err){
     if(err) {
       console.log(err)
@@ -57,7 +58,7 @@ app.post("/login", function(req, res){
       console.log(err)
     } else {
       if (founderUser) {
-        if (founderUser.password === req.body.password) {
+        if (founderUser.password === md5(req.body.password)) {
           res.render("secrets")
         }
       }
